@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, interactive-widget=resizes-content">
 <title>sranye — Drop 01</title>
 <meta name="description" content="sranye streetwear. Drop 01: tees with your nickname on the back.">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
@@ -111,6 +111,7 @@
   .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid rgba(255,255,255,.14); padding-top: 20px; }
   .total strong { font-weight: 900; font-size: clamp(40px, 4vw, 56px); letter-spacing: -.05em; line-height: 1; }
   .cta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .buy { display: grid; gap: 36px; }
   .btn { padding: 16px 22px; font-weight: 700; font-size: var(--t-body); background: #fff; color: #000; transition: transform 160ms var(--ease-out), opacity 200ms; }
   .btn:active { transform: scale(.97); }
   .btn.ghost { background: var(--tone-2); color: #fff; }
@@ -176,8 +177,29 @@
     .facts { grid-template-columns: 1fr; gap: 8px; }
     .facts div { padding: 14px 18px; display: flex; align-items: baseline; gap: 16px; }
     .facts strong { margin: 0; min-width: 2.2em; font-size: 48px; }
-    .studio { grid-template-columns: 1fr; }
-    .preview { position: relative; top: 0; }
+    /* Customizer on phones: the shirt stays pinned under the top bar while you scroll the
+       options or type, and is sized off the *dynamic* viewport so it shrinks when the
+       keyboard opens (viewport meta has interactive-widget=resizes-content). */
+    .studio { grid-template-columns: 1fr; gap: 20px; }
+    .preview { top: var(--bar-h, 60px); z-index: 2; aspect-ratio: auto; height: min(46dvh, 100vw); margin: 0 calc(-1 * var(--gutter)); }
+    .preview .flip { left: var(--gutter); top: 10px; }
+    .preview .tag { right: var(--gutter); bottom: 10px; }
+    .controls { gap: 28px; }
+    .nick { font-size: 44px; }
+    .field:has(.nick) { scroll-margin-top: calc(var(--bar-h, 60px) + min(46dvh, 100vw) + 12px); }
+    /* options as even full-width grids with proper tap targets */
+    .controls .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
+    .controls .seg[data-k="case"] { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+    .controls .seg button { min-height: 48px; padding: 10px 8px; text-align: center; }
+    /* price + actions become a bar along the bottom; it steps aside while the keyboard is up */
+    .buy { position: sticky; bottom: 0; z-index: 3; grid-template-columns: auto 1fr; align-items: center; gap: 16px; margin: 0 calc(-1 * var(--gutter)); padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom)); background: #000; border-top: 1px solid rgba(255,255,255,.14); }
+    .buy .total { border: 0; padding: 0; flex-direction: column; gap: 2px; }
+    .buy .total .small { display: none; }
+    .buy .total strong { font-size: 32px; }
+    .buy .cta { flex-wrap: nowrap; }
+    .buy .btn { padding: 14px 16px; white-space: nowrap; }
+    .buy #addBtn { flex: 1; }
+    .controls.typing .buy { display: none; }
     .grid { grid-template-columns: 1fr; row-gap: 64px; }
     .grid .item { grid-column: 1 / -1 !important; }
     .hud { flex-wrap: wrap; bottom: 24px; }
@@ -238,7 +260,7 @@
       <div class="controls">
         <label class="field">
           <span>Nickname <em id="left">16 left</em></span>
-          <input class="nick" id="nick" type="text" maxlength="16" placeholder="yourname" autocomplete="off" spellcheck="false" value="street">
+          <input class="nick" id="nick" type="text" maxlength="16" placeholder="yourname" autocomplete="off" autocapitalize="none" autocorrect="off" spellcheck="false" enterkeyhint="done" value="street">
         </label>
         <div class="field">
           <span>Case</span>
@@ -266,10 +288,12 @@
             <button data-v="XXL" aria-pressed="false">XXL</button>
           </div>
         </div>
-        <div class="total"><span class="small">Tee + custom back</span><strong>€39</strong></div>
-        <div class="cta">
-          <button class="btn" id="addBtn">Add to bag</button>
-          <button class="btn ghost" id="shareBtn">Copy link</button>
+        <div class="buy">
+          <div class="total"><span class="small">Tee + custom back</span><strong>€39</strong></div>
+          <div class="cta">
+            <button class="btn" id="addBtn">Add to bag</button>
+            <button class="btn ghost" id="shareBtn">Copy link</button>
+          </div>
         </div>
       </div>
     </div>
@@ -559,6 +583,20 @@ function render() {
 }
 
 $("#nick").addEventListener("input", e => { state.name = e.target.value; state.side = "back"; render(); });
+
+/* phones: keep the field just under the pinned shirt once the keyboard is up, and let
+   the keyboard's Done key close it */
+const phone = matchMedia("(max-width: 860px)");
+const syncBarHeight = () => document.documentElement.style.setProperty("--bar-h", $("#bar").offsetHeight + "px");
+addEventListener("resize", syncBarHeight); syncBarHeight();
+$("#nick").addEventListener("blur", () => $(".controls").classList.remove("typing"));
+$("#nick").addEventListener("focus", () => {
+  $(".controls").classList.add("typing");
+  if (!phone.matches) return;
+  state.side = "back"; render();
+  setTimeout(() => $("#nick").closest(".field").scrollIntoView({ block: "start", behavior: "smooth" }), 300);
+});
+$("#nick").addEventListener("keydown", e => { if (e.key === "Enter") e.target.blur(); });
 document.querySelectorAll(".seg[data-k]").forEach(seg => seg.addEventListener("click", e => {
   const b = e.target.closest("button"); if (!b || b.disabled) return;
   state[seg.dataset.k] = b.dataset.v;
@@ -567,10 +605,14 @@ document.querySelectorAll(".seg[data-k]").forEach(seg => seg.addEventListener("c
 }));
 document.querySelectorAll(".flip button").forEach(b => b.addEventListener("click", () => { state.side = b.dataset.side; render(); }));
 
+// on touch devices with a share sheet, "Copy link" becomes "Share"
+const canShare = !!navigator.share && matchMedia("(pointer: coarse)").matches;
+if (canShare) $("#shareBtn").textContent = "Share";
 $("#shareBtn").addEventListener("click", async () => {
   const u = new URL(location.href);
   u.search = new URLSearchParams({ name: state.name, case: state.case, color: state.color, size: state.size }).toString();
   u.hash = "custom";
+  if (canShare) { try { await navigator.share({ title: "My sranye tee", url: u.toString() }); } catch {} return; }
   try { await navigator.clipboard.writeText(u.toString()); toast("Link copied"); }
   catch { toast("Couldn’t copy, link is in the address bar"); history.replaceState(null, "", u); }
 });
