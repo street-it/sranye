@@ -63,8 +63,7 @@
   .hud { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; pointer-events: none; }
   .hud .lead { font-weight: 500; max-width: 26ch; line-height: 1.35; }
   .hud .hint, .hud .tc { font-size: var(--t-small); }
-  /* the hero is a gate: the page stays put until Enter is pressed */
-  html.gated { overflow: hidden; }
+  /* Enter button: optional, one scroll down does the same */
   /* centred on the screen, not between the tagline and timecode (they differ in width), sitting just above that row */
   .hud .enter { position: absolute; left: 50%; translate: -50% 0; bottom: calc(100% + clamp(20px, 5vh, 48px)); white-space: nowrap; pointer-events: auto; padding: 14px 26px; background: #fff; color: #000; font-weight: 700; font-size: var(--t-body); transition: transform 160ms var(--ease-out), opacity 300ms; }
   .hud .enter:hover span { display: inline-block; transform: translateY(2px); }
@@ -672,16 +671,12 @@ function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.ad
 const hero = $(".hero"), mark = $("#heroMark");
 requestAnimationFrame(() => setTimeout(() => mark.classList.remove("flat"), 250));
 
-/* ---------- gate: locked on the logo until Enter; then glide into the site ---------- */
+/* ---------- logo screen: one scroll down (or the Enter button) glides into the site ---------- */
 const enterBtn = $("#enter");
-const gated = !location.hash; // deep links like #custom skip the gate
-if (gated) { history.scrollRestoration = "manual"; scrollTo(0, 0); document.documentElement.classList.add("gated"); }
+if (!location.hash) { history.scrollRestoration = "manual"; scrollTo(0, 0); } // always open on the logo, unless deep-linked
 // The button shows whenever the logo screen is at rest (see onScroll), so scrolling back
-// to the top brings it back; only the first press unlocks scrolling.
-function enterSite(scroll = true) {
-  document.documentElement.classList.remove("gated");
-  if (scroll) glideTo(hero.offsetHeight);
-}
+// to the top brings it back.
+const enterSite = () => glideTo(hero.offsetHeight);
 
 /* ---------- no dead scroll through the hero: any move inside it glides to the top or past it ---------- */
 let gliding = false, lastY = scrollY;
@@ -700,12 +695,10 @@ function glideTo(target) {
 for (const ev of ["wheel", "touchmove"]) addEventListener(ev, e => { if (gliding) e.preventDefault(); }, { passive: false });
 addEventListener("scroll", () => {
   const y = scrollY, h = hero.offsetHeight;
-  if (!gliding && !document.documentElement.classList.contains("gated") && y > 0 && y < h) glideTo(y < lastY ? 0 : h);
+  if (!gliding && y > 0 && y < h) glideTo(y < lastY ? 0 : h);
   if (!gliding) lastY = y;
 }, { passive: true });
-enterBtn.addEventListener("click", () => enterSite());
-addEventListener("keydown", e => { if (e.key === "Enter" && document.documentElement.classList.contains("gated")) enterSite(); });
-document.querySelectorAll('.bar a[href^="#"]').forEach(a => a.addEventListener("click", () => enterSite(false)));
+enterBtn.addEventListener("click", enterSite);
 
 function onScroll() {
   const max = hero.offsetHeight - innerHeight;
