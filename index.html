@@ -1,0 +1,698 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>sranye — Drop 01</title>
+<meta name="description" content="sranye streetwear. Drop 01: tees with your nickname on the back.">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;800;900&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #000; --fg: #fff; --dim: rgba(255,255,255,.64); --tone: #121212; --tone-2: #1c1c1c;
+    --sans: "Inter Tight", system-ui, sans-serif; --brand: "Space Grotesk", var(--sans);
+    --gutter: clamp(16px, 3vw, 40px); --gap: clamp(120px, 14vw, 200px);
+    --t-display: clamp(96px, 24vw, 460px); --t-heading: clamp(44px, 7vw, 112px);
+    --t-title: clamp(22px, 2.2vw, 32px); --t-body: 18px; --t-small: 15px;
+    --ease-out: cubic-bezier(.23, 1, .32, 1); --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { background: var(--bg); color-scheme: dark; scrollbar-color: #3a3a3a #000; }
+  body { background: var(--bg); color: var(--fg); font-family: var(--sans); font-size: var(--t-body); line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; font-variant-numeric: tabular-nums; }
+  a { color: inherit; text-decoration: none; }
+  button, input { font: inherit; color: inherit; background: none; border: 0; }
+  button { cursor: pointer; }
+  ::selection { background: #fff; color: #000; }
+  :focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
+  .small { font-size: var(--t-small); color: var(--dim); }
+
+  /* crosshair cursor, same as street-it */
+  :root {
+    --xh: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2v6M12 16v6M2 12h6M16 12h6' stroke='%23000' stroke-width='4' stroke-linecap='square' stroke-opacity='.55'/%3E%3Cpath d='M12 2v6M12 16v6M2 12h6M16 12h6' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E");
+    --xo: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 1v4M12 19v4M1 12h4M19 12h4' stroke='%23000' stroke-width='4' stroke-linecap='square' stroke-opacity='.55'/%3E%3Cpath d='M12 1v4M12 19v4M1 12h4M19 12h4' stroke='%23fff' stroke-width='2'/%3E%3C/svg%3E");
+  }
+  @media (hover: hover) and (pointer: fine) {
+    body, body * { cursor: var(--xh) 12 12, crosshair; }
+    body :is(a, button, label, .card), body :is(a, button, label, .card) * { cursor: var(--xo) 12 12, pointer; }
+    body input[type="text"] { cursor: text; }
+  }
+
+  /* the logo, as live type (same geometry as the SVG) */
+  .mark { font-family: var(--brand); font-weight: 700; letter-spacing: -.05em; line-height: 1; white-space: nowrap; }
+  .mark .st { display: inline-block; background: var(--fg); color: var(--bg); padding: .04em .07em .2em .05em; margin-left: .06em; line-height: .8; vertical-align: -.16em; transform: rotate(-6deg) translateY(-.02em); }
+
+  /* top bar */
+  .bar { position: fixed; inset: 0 0 auto; z-index: 50; display: flex; justify-content: space-between; align-items: center; padding: 16px var(--gutter); font-size: var(--t-small); font-weight: 600; transition: background-color 200ms; }
+  .bar.solid { background: #000; }
+  .bar .logo img { height: 26px; width: auto; display: block; }
+  .bar nav { display: flex; gap: 12px; margin-right: -10px; align-items: center; }
+  .bar nav a, .bar nav button { padding: 12px 10px; margin: -12px 0; text-decoration: underline transparent; text-underline-offset: 5px; transition: text-decoration-color 200ms; font-weight: 600; }
+  .bar nav :is(a, button):hover { text-decoration-color: #fff; }
+  .bar .bag-btn { background: #fff; color: #000; padding: 8px 12px; margin: -8px 0 -8px 6px; text-decoration: none !important; transition: transform 160ms var(--ease-out); }
+  .bar .bag-btn:active { transform: scale(.96); }
+  @media (max-width: 600px) { .bar nav .hide-s { display: none; } }
+
+  /* hero */
+  .hero { height: 165vh; position: relative; }
+  .hero .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; place-items: center; }
+  .hero .mark { font-size: var(--t-display); padding-right: .06em; will-change: transform; }
+  .hero .mark .st { transition: transform 900ms var(--ease-out); }
+  .hero .mark.flat .st { transform: rotate(0deg); }
+  .hud { position: absolute; left: var(--gutter); right: var(--gutter); bottom: 30px; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; pointer-events: none; }
+  .hud .lead { font-weight: 500; max-width: 26ch; line-height: 1.35; }
+  .hud .hint, .hud .tc { font-size: var(--t-small); }
+  /* the hero is a gate: the page stays put until Enter is pressed */
+  html.gated { overflow: hidden; }
+  .hud .enter { pointer-events: auto; margin-bottom: clamp(40px, 7vh, 72px); padding: 14px 26px; background: #fff; color: #000; font-weight: 700; font-size: var(--t-body); transition: transform 160ms var(--ease-out), opacity 300ms; }
+  .hud .enter:hover span { display: inline-block; transform: translateY(2px); }
+  .hud .enter span { display: inline-block; transition: transform 200ms var(--ease-out); }
+  .hud .enter:active { transform: scale(.96); }
+  .hud .enter.gone { opacity: 0; pointer-events: none; }
+  .scrub { position: absolute; left: 0; right: 0; bottom: 0; height: 4px; background: rgba(255,255,255,.2); }
+  .scrub b { position: absolute; inset: 0; background: #fff; transform-origin: left; transform: scaleX(0); }
+
+  section { position: relative; }
+  h2 { font-weight: 900; letter-spacing: -.055em; line-height: .9; font-size: var(--t-heading); }
+  .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 32px; margin-bottom: 72px; }
+  .head .lead { max-width: 30ch; padding-bottom: 6px; }
+
+  /* about */
+  .about { padding: var(--gap) var(--gutter) calc(var(--gap) * .7); display: grid; grid-template-columns: 6fr 6fr; gap: 72px var(--gutter); align-items: end; }
+  .about .statement { font-weight: 500; letter-spacing: -.02em; line-height: 1.3; font-size: clamp(24px, 2.6vw, 36px); max-width: 24em; padding-bottom: 6px; }
+  .facts { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); gap: 40px var(--gutter); }
+  .facts div { background: var(--tone); padding: 24px; }
+  .facts strong { display: block; font-weight: 900; font-size: clamp(44px, 5vw, 80px); letter-spacing: -.05em; line-height: 1; margin-bottom: 10px; }
+
+  /* customizer */
+  .custom { padding: var(--gap) var(--gutter) 0; }
+  .studio { display: grid; grid-template-columns: 7fr 5fr; gap: var(--gutter); align-items: start; }
+  .preview { position: sticky; top: 76px; background: var(--tone); aspect-ratio: 1 / 1; display: grid; place-items: center; overflow: hidden; }
+  .preview #shirt { position: absolute; inset: 0; display: grid; place-items: center; touch-action: pan-y; }
+  .preview #shirt > img { width: 86%; height: 86%; object-fit: contain; }
+  .preview #shirt canvas { display: block; width: 100% !important; height: 100% !important; }
+  .preview.grabbing, .preview.grabbing * { cursor: grabbing !important; }
+  .preview .flip, .preview .tag { z-index: 1; }
+  .preview .flip { position: absolute; left: 14px; top: 14px; display: flex; gap: 4px; }
+  .preview .tag { position: absolute; right: 14px; bottom: 14px; }
+  .seg { display: flex; flex-wrap: wrap; gap: 4px; }
+  .seg button { padding: 8px 12px; background: var(--tone-2); font-size: var(--t-small); font-weight: 600; transition: background-color 160ms, color 160ms, transform 160ms var(--ease-out); }
+  .seg button:active { transform: scale(.96); }
+  .seg button[aria-pressed="true"] { background: #fff; color: #000; }
+  .seg button:disabled { opacity: .35; cursor: default; }
+  .controls { display: grid; gap: 36px; }
+  .field > span { display: flex; justify-content: space-between; margin-bottom: 10px; font-weight: 600; font-size: var(--t-small); }
+  .field > span em { font-style: normal; color: var(--dim); font-weight: 500; }
+  .nick { display: block; width: 100%; background: transparent; border-bottom: 2px solid rgba(255,255,255,.3); font-family: var(--brand); font-weight: 700; font-size: clamp(36px, 4.4vw, 64px); letter-spacing: -.05em; line-height: 1.1; padding: 4px 0 8px; transition: border-color 200ms; }
+  .nick:focus { outline: none; border-color: #fff; }
+  .nick::placeholder { color: rgba(255,255,255,.25); }
+  .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid rgba(255,255,255,.14); padding-top: 20px; }
+  .total strong { font-weight: 900; font-size: clamp(40px, 4vw, 56px); letter-spacing: -.05em; line-height: 1; }
+  .cta { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn { padding: 16px 22px; font-weight: 700; font-size: var(--t-body); background: #fff; color: #000; transition: transform 160ms var(--ease-out), opacity 200ms; }
+  .btn:active { transform: scale(.97); }
+  .btn.ghost { background: var(--tone-2); color: #fff; }
+  .btn:disabled { opacity: .4; cursor: default; }
+
+  /* shop */
+  .shop { padding: var(--gap) var(--gutter) 0; }
+  .grid { display: grid; grid-template-columns: repeat(12, 1fr); column-gap: var(--gutter); row-gap: 88px; align-items: start; }
+  .item:nth-child(1) { grid-column: 1 / span 7; }
+  .item:nth-child(2) { grid-column: 8 / span 5; }
+  .item:nth-child(3) { grid-column: 1 / span 5; }
+  .item:nth-child(4) { grid-column: 6 / span 7; }
+  .card { display: block; width: 100%; text-align: left; transition: transform 160ms var(--ease-out); }
+  .card:active { transform: scale(.985); }
+  .card .media { position: relative; aspect-ratio: 4 / 3; overflow: hidden; background: var(--tone); display: grid; place-items: center; }
+  .card .media img { width: 62%; height: 80%; object-fit: contain; transition: transform 900ms var(--ease-out); }
+  .card .go { position: absolute; left: 14px; bottom: 14px; padding: 8px 12px; background: #fff; color: #000; font-size: var(--t-small); font-weight: 600; opacity: 0; transform: translateY(6px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); }
+  @media (hover: hover) and (pointer: fine) {
+    .card:hover .media img { transform: scale(1.04); }
+    .card:hover .go { opacity: 1; transform: none; }
+  }
+  @media (hover: none) { .card .go { opacity: 1; transform: none; } }
+  .card .meta { display: flex; justify-content: space-between; align-items: baseline; gap: 16px; padding-top: 16px; }
+  .card h3 { font-weight: 800; letter-spacing: -.035em; font-size: var(--t-title); line-height: 1.05; }
+
+  /* contact */
+  .contact { padding: var(--gap) var(--gutter) 32px; }
+  .contact .lead { margin-top: 32px; max-width: 34ch; }
+  .links { display: flex; flex-wrap: wrap; gap: 16px 48px; margin-top: 64px; font-size: var(--t-title); font-weight: 800; letter-spacing: -.03em; }
+  .links a { text-decoration: underline 2px rgba(255,255,255,.3); text-underline-offset: 8px; transition: text-decoration-color 200ms; }
+  .links a:hover { text-decoration-color: #fff; }
+  .links a .small { font-weight: 500; letter-spacing: 0; margin-left: 8px; }
+  footer { margin-top: 120px; display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+
+  /* bag drawer */
+  .scrim { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.6); opacity: 0; visibility: hidden; transition: opacity 200ms, visibility 200ms; }
+  .bag { position: fixed; top: 0; right: 0; bottom: 0; z-index: 100; width: min(440px, 100%); background: #000; border-left: 1px solid rgba(255,255,255,.14); display: grid; grid-template-rows: auto 1fr auto; transform: translateX(100%); transition: transform 380ms var(--ease-out); }
+  body.bag-open .scrim { opacity: 1; visibility: visible; }
+  body.bag-open .bag { transform: none; }
+  .bag header { display: flex; justify-content: space-between; align-items: center; padding: 16px var(--gutter); }
+  .bag header strong { font-weight: 800; font-size: var(--t-title); letter-spacing: -.03em; }
+  .bag .close { padding: 10px 16px; background: #fff; color: #000; font-weight: 600; font-size: var(--t-small); }
+  .bag ul { list-style: none; overflow: auto; padding: 0 var(--gutter); }
+  .bag li { display: grid; grid-template-columns: 72px 1fr auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid rgba(255,255,255,.1); }
+  .bag li .th { aspect-ratio: 1; background: var(--tone); display: grid; place-items: center; }
+  .bag li .th img { width: 80%; height: 80%; object-fit: contain; }
+  .bag li b { display: block; font-weight: 800; letter-spacing: -.03em; }
+  .bag li button { font-size: var(--t-small); color: var(--dim); text-decoration: underline; text-underline-offset: 3px; }
+  .bag .empty { padding: 24px var(--gutter); }
+  .bag footer { margin: 0; padding: 16px var(--gutter) 24px; display: grid; gap: 12px; border-top: 1px solid rgba(255,255,255,.14); }
+  .bag footer .row { display: flex; justify-content: space-between; font-weight: 800; font-size: var(--t-title); letter-spacing: -.03em; }
+
+  .toast { position: fixed; left: 50%; bottom: 24px; z-index: 120; translate: -50% 0; background: #fff; color: #000; padding: 10px 16px; font-weight: 600; font-size: var(--t-small); opacity: 0; transform: translateY(8px); transition: opacity 200ms var(--ease-out), transform 200ms var(--ease-out); pointer-events: none; }
+  .toast.on { opacity: 1; transform: none; }
+
+  @media (prefers-reduced-motion: no-preference) {
+    .js .rise { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out) var(--d, 0ms), transform 700ms var(--ease-out) var(--d, 0ms); }
+    .js .rise.in { opacity: 1; transform: none; }
+  }
+  @media (max-width: 860px) {
+    .head { flex-direction: column; align-items: flex-start; margin-bottom: 48px; }
+    .about { grid-template-columns: 1fr; gap: 40px; }
+    .facts { grid-template-columns: 1fr; gap: 8px; }
+    .facts div { padding: 14px 18px; display: flex; align-items: baseline; gap: 16px; }
+    .facts strong { margin: 0; min-width: 2.2em; font-size: 48px; }
+    .studio { grid-template-columns: 1fr; }
+    .preview { position: relative; top: 0; }
+    .grid { grid-template-columns: 1fr; row-gap: 64px; }
+    .grid .item { grid-column: 1 / -1 !important; }
+    .hud { flex-wrap: wrap; bottom: 24px; }
+    .hud .hint { display: none; }
+  }
+</style>
+</head>
+<body>
+</div>
+<header class="bar" id="bar">
+  <a class="logo" href="#top" aria-label="sranye home"><img src="logo.svg" alt="sranye"></a>
+  <nav>
+    <a href="#custom">Custom</a>
+    <a class="hide-s" href="#shop">Shop</a>
+    <a class="hide-s" href="#contact">Contact</a>
+    <button class="bag-btn" id="bagBtn" aria-label="Open bag">Bag (<span id="bagCount">0</span>)</button>
+  </nav>
+</header>
+
+<main id="top">
+  <section class="hero">
+    <div class="stage">
+      <div class="mark flat" id="heroMark" aria-label="sranye"><span aria-hidden="true">Sran</span><span class="st" aria-hidden="true">ye</span></div>
+      <div class="hud">
+        <p class="lead">Streetwear with your name on the back. Drop 01 is out now.</p>
+        <button class="enter" id="enter">Enter <span aria-hidden="true">↓</span></button>
+        <span class="tc">DROP 01 · <span id="tc">00:00:00:00</span></span>
+      </div>
+      <div class="scrub"><b id="scrub"></b></div>
+    </div>
+  </section>
+
+  <section class="about">
+    <h2 class="rise">One shirt,<br>one name.</h2>
+    <p class="statement rise" style="--d:120ms">Every back is printed for the person wearing it. Type your nickname, pick a size, and it goes to print the day you order.</p>
+    <div class="facts">
+      <div class="rise"><strong>01</strong><span class="small">Current drop</span></div>
+      <div class="rise" style="--d:80ms"><strong>1/1</strong><span class="small">Every back</span></div>
+      <div class="rise" style="--d:160ms"><strong>220</strong><span class="small">GSM heavy cotton</span></div>
+      <div class="rise" style="--d:240ms"><strong>16</strong><span class="small">Characters max</span></div>
+    </div>
+  </section>
+
+  <section class="custom" id="custom">
+    <div class="head">
+      <h2 class="rise">Your name<br>on the back</h2>
+      <p class="lead small rise" style="--d:120ms">Type a nickname and it takes the place of the name on the print, playhead and all. What you see is what we press.</p>
+    </div>
+    <div class="studio">
+      <div class="preview" id="preview">
+        <div class="flip seg" role="group" aria-label="Side">
+          <button data-side="front" aria-pressed="true">Front</button>
+          <button data-side="back" aria-pressed="false">Back</button>
+        </div>
+        <div id="shirt"></div>
+        <span class="tag small" id="artNote"></span>
+      </div>
+      <div class="controls">
+        <label class="field">
+          <span>Nickname <em id="left">16 left</em></span>
+          <input class="nick" id="nick" type="text" maxlength="16" placeholder="yourname" autocomplete="off" spellcheck="false" value="street">
+        </label>
+        <div class="field">
+          <span>Case</span>
+          <div class="seg" role="group" aria-label="Letter case" data-k="case">
+            <button data-v="street" aria-pressed="true">sTreeT case</button>
+            <button data-v="typed" aria-pressed="false">As typed</button>
+            <button data-v="lower" aria-pressed="false">lowercase</button>
+            <button data-v="caps" aria-pressed="false">CAPS</button>
+          </div>
+        </div>
+        <div class="field">
+          <span>Shirt</span>
+          <div class="seg" role="group" aria-label="Shirt colour" data-k="color">
+            <button data-v="black" aria-pressed="true">Black</button>
+            <button data-v="white" aria-pressed="false">White</button>
+          </div>
+        </div>
+        <div class="field">
+          <span>Size <em>Boxy fit, size down for regular</em></span>
+          <div class="seg" role="group" aria-label="Size" data-k="size">
+            <button data-v="S" aria-pressed="false">S</button>
+            <button data-v="M" aria-pressed="true">M</button>
+            <button data-v="L" aria-pressed="false">L</button>
+            <button data-v="XL" aria-pressed="false">XL</button>
+            <button data-v="XXL" aria-pressed="false">XXL</button>
+          </div>
+        </div>
+        <div class="total"><span class="small">Tee + custom back</span><strong>€39</strong></div>
+        <div class="cta">
+          <button class="btn" id="addBtn">Add to bag</button>
+          <button class="btn ghost" id="shareBtn">Copy link</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="shop" id="shop">
+    <div class="head">
+      <h2 class="rise">Drop 01</h2>
+      <p class="lead small rise" style="--d:120ms">Four pieces. Tees take a custom back, the rest ship as they are.</p>
+    </div>
+    <div class="grid" id="grid"></div>
+  </section>
+
+  <section class="contact" id="contact">
+    <h2 class="rise">Wear your tag</h2>
+    <p class="lead small rise" style="--d:120ms">Questions about sizing, bulk orders for a team, or a name that won’t fit? Send a message.</p>
+    <div class="links rise" style="--d:200ms">
+      <a href="https://instagram.com/" target="_blank" rel="noopener">Instagram<span class="small">@sranye</span></a>
+      <a href="mailto:hello@sranye.com">Email<span class="small">hello@sranye.com</span></a>
+    </div>
+    <footer class="small">
+      <span>© 2026 sranye</span>
+      <span>Printed on order</span>
+      <span>Your time <span id="clock"></span></span>
+    </footer>
+  </section>
+</main>
+
+<div class="scrim" id="scrim"></div>
+<aside class="bag" id="bag" aria-label="Bag" aria-hidden="true">
+  <header><strong>Bag</strong><button class="close" id="bagClose">Close</button></header>
+  <ul id="bagList"></ul>
+  <footer>
+    <div class="row"><span>Total</span><span id="bagTotal">€0</span></div>
+    <button class="btn" disabled>Checkout opens soon</button>
+  </footer>
+</aside>
+<div class="toast" id="toast" role="status"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+document.documentElement.classList.add("js");
+const $ = (s, r = document) => r.querySelector(s);
+
+/* ---------- shirt artwork ---------- */
+// Curved outline: sloped shoulders, rounded sleeves, slightly waisted sides, curved hem.
+// ("Q200 52" is the back neckline; teePath swaps it for the front's deeper scoop.)
+const TEE = "M140 24 Q200 52 260 24 C292 30 320 40 340 54 C362 80 382 108 392 132 Q370 152 344 164 C334 156 324 148 318 144 "
+  + "C322 240 316 330 320 424 Q200 434 80 424 C84 330 78 240 82 144 C76 148 66 156 56 164 Q30 152 8 132 "
+  + "C18 108 38 80 60 54 C80 40 108 30 140 24 Z";
+const esc = s => s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const TIMECODE = "00:10:00:00";
+
+// "street" -> "sTreeT": lowercase, with the second and last letters capitalised
+function caseName(name, mode) {
+  const n = name.trim();
+  if (mode === "caps") return n.toUpperCase();
+  if (mode === "lower") return n.toLowerCase();
+  if (mode === "street") {
+    const c = [...n.toLowerCase()];
+    if (c.length > 1) c[1] = c[1].toUpperCase();
+    if (c.length > 2) c[c.length - 1] = c[c.length - 1].toUpperCase();
+    return c.join("");
+  }
+  return n;
+}
+
+/* ---------- 3D tee ----------
+   Built from the same 2D silhouette: a dense grid is cut to the tee shape, then
+   "inflated" by each point's distance to the edge, so front and back panels meet
+   at the seams and the body gets volume. Prints are drawn live onto canvas textures. */
+const TS = 2.56; // texture pixels per shirt unit (the shirt is 400 x 440 units)
+const teePath = neckDepth => new Path2D(TEE.replace("Q200 52", `Q200 ${neckDepth}`));
+
+function drawPanel(ctx, side, s, scale = TS) {
+  const black = s.color === "black";
+  const shirt = black ? "#0d0d0d" : "#ededed", ink = black ? "#fff" : "#000", seam = black ? "#262626" : "#cfcfcf";
+  ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+  ctx.save();
+  ctx.scale(scale, scale);
+  const outline = teePath(side === "front" ? 80 : 40);
+  ctx.clip(outline);
+  ctx.fillStyle = shirt; ctx.fillRect(0, 0, 400, 440);
+  // stitching: armholes, collar rib, hem, edge
+  ctx.strokeStyle = seam; ctx.lineWidth = 2;
+  ctx.stroke(new Path2D("M100 56 Q88 100 82 142 M300 56 Q312 100 318 142 M82 410 L318 410"));
+  ctx.lineWidth = 7; ctx.stroke(new Path2D(`M140 24 Q200 ${side === "front" ? 80 : 40} 260 24`));
+  ctx.lineWidth = 4; ctx.stroke(outline);
+  ctx.fillStyle = ink;
+  if (side === "front") {
+    // small chest logo: "Sran" + tilted "ye" sticker
+    const size = 22, x = 206, y = 112;
+    ctx.font = `700 ${size}px "Space Grotesk"`; ctx.letterSpacing = `${-size * .05}px`; ctx.textAlign = "left";
+    ctx.fillText("Sran", x, y);
+    const sx = x + ctx.measureText("Sran").width + size * .06, bw = ctx.measureText("ye").width + size * .12, bh = size * 1.04;
+    const top = y + size * .16 - size * .786;
+    ctx.save(); ctx.translate(sx + bw / 2, top + bh / 2); ctx.rotate(-6 * Math.PI / 180);
+    ctx.fillRect(-bw / 2, -bh / 2, bw, bh);
+    ctx.fillStyle = shirt; ctx.fillText("ye", -bw / 2 + size * .05, size * (.786 - .52)); // baseline sits .786em below the box top
+    ctx.restore();
+  } else {
+    // The back print, drawn in the artwork's own 1932px frame: the name where "sTreeT" sits,
+    // a playhead through it at 68% of its width, and the timecode flag above the playhead.
+    const name = caseName(s.name, s.case);
+    const k = 340 / 1932; // the name spans about 70% of the back, like a full-back print
+    ctx.translate(200 - 966 * k, 30); ctx.scale(k, k);
+    if (name) {
+      const font = f => { ctx.font = `900 ${f}px "Inter Tight"`; ctx.letterSpacing = `${-f * .065}px`; };
+      let f = 326; font(f);
+      // The whole print (name, plus the timecode flag that hangs off the playhead) must stay
+      // inside the back's safe band: shirt x 103..297, i.e. 1102px of this frame centred on 966
+      // (less a little slack for glyph overhang and trailing letter-spacing).
+      // Long names shrink the font until they fit.
+      const BAND = 1102 - 30, span = w => Math.max(w, w * .68 + 232);
+      let w = ctx.measureText(name).width;
+      if (span(w) > BAND) { f *= BAND / w; font(f); w = ctx.measureText(name).width; }
+      const left = 966 - span(w) / 2, px = left + w * .68;
+      ctx.textAlign = "left"; ctx.fillStyle = ink;
+      ctx.fillText(name, left, 1085);
+      ctx.fillRect(px - 148, 261, 380, 82);
+      ctx.fillStyle = shirt; ctx.font = `600 64px "Inter Tight"`; ctx.letterSpacing = "1px"; ctx.textAlign = "center";
+      ctx.fillText(TIMECODE, px + 42, 325);
+      // playhead inverts whatever it crosses, like in the artwork
+      ctx.globalCompositeOperation = "difference"; ctx.fillStyle = "#fff";
+      ctx.fillRect(px - 3, 362, 6, 1206);
+      ctx.globalCompositeOperation = "source-over";
+    }
+  }
+  ctx.restore();
+}
+
+// Flat render of a shirt for thumbnails (shop, bag, and the no-WebGL fallback)
+function teeThumb(s, side = "back") {
+  const c = document.createElement("canvas"); c.width = 480; c.height = 528;
+  drawPanel(c.getContext("2d"), side, s, 1.2);
+  return c.toDataURL();
+}
+
+function makeTee3D(host) {
+  if (!window.THREE) return null;
+  let renderer;
+  try { renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); } catch { return null; }
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(30, 1, .1, 100);
+  camera.position.set(0, .15, 10.5);
+  scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, .75));
+  const key = new THREE.DirectionalLight(0xffffff, .75); key.position.set(3, 4, 6); scene.add(key);
+  const rim = new THREE.DirectionalLight(0xffffff, .6); rim.position.set(-3, 3, -6); scene.add(rim);
+
+  // distance from every pixel to the silhouette edge (two-pass chamfer)
+  const W = 400, H = 440, mc = document.createElement("canvas"); mc.width = W; mc.height = H;
+  const mx = mc.getContext("2d"); mx.fill(teePath(40));
+  const px = mx.getImageData(0, 0, W, H).data, dist = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) dist[i] = px[i * 4 + 3] > 127 ? 1e6 : 0;
+  const D1 = 1, D2 = Math.SQRT2;
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const i = y * W + x; if (!dist[i]) continue;
+    let d = dist[i];
+    if (x > 0) d = Math.min(d, dist[i - 1] + D1); else d = Math.min(d, D1);
+    if (y > 0) { d = Math.min(d, dist[i - W] + D1); if (x > 0) d = Math.min(d, dist[i - W - 1] + D2); if (x < W - 1) d = Math.min(d, dist[i - W + 1] + D2); } else d = Math.min(d, D1);
+    dist[i] = d;
+  }
+  for (let y = H - 1; y >= 0; y--) for (let x = W - 1; x >= 0; x--) {
+    const i = y * W + x; if (!dist[i]) continue;
+    let d = dist[i];
+    if (x < W - 1) d = Math.min(d, dist[i + 1] + D1); else d = Math.min(d, D1);
+    if (y < H - 1) { d = Math.min(d, dist[i + W] + D1); if (x < W - 1) d = Math.min(d, dist[i + W + 1] + D2); if (x > 0) d = Math.min(d, dist[i + W - 1] + D2); } else d = Math.min(d, D1);
+    dist[i] = d;
+  }
+  // Depth: a rounded (quarter-circle) profile off the edge, then blurred so the ridges where
+  // distances meet (shoulders, armpits) melt into soft fabric. Pinned back to 0 at the very
+  // edge so the front and back panels still close at the seams.
+  const zf = new Float32Array(W * H), tmp = new Float32Array(W * H);
+  for (let i = 0; i < W * H; i++) { const t = Math.min(dist[i] / 70, 1); zf[i] = dist[i] ? Math.sqrt(1 - (1 - t) * (1 - t)) : 0; }
+  const blur = (src, dst, r, horiz) => {
+    const n = horiz ? W : H, m = horiz ? H : W;
+    for (let j = 0; j < m; j++) {
+      let acc = 0;
+      const at = i => src[horiz ? j * W + i : i * W + j];
+      for (let i = -r; i <= r; i++) acc += at(Math.min(n - 1, Math.max(0, i)));
+      for (let i = 0; i < n; i++) {
+        dst[horiz ? j * W + i : i * W + j] = acc / (2 * r + 1);
+        acc += at(Math.min(n - 1, i + r + 1)) - at(Math.max(0, i - r));
+      }
+    }
+  };
+  for (let pass = 0; pass < 3; pass++) { blur(zf, tmp, 7, true); blur(tmp, zf, 7, false); }
+  for (let i = 0; i < W * H; i++) zf[i] = dist[i] ? zf[i] * Math.sqrt(Math.min(1, dist[i] / 8)) : 0;
+  const depthAt = (u, v) => { // bilinear, so the surface has no pixel steps
+    const fx = Math.min(W - 1.001, Math.max(0, u * (W - 1))), fy = Math.min(H - 1.001, Math.max(0, (1 - v) * (H - 1)));
+    const x = fx | 0, y = fy | 0, ax = fx - x, ay = fy - y, i = y * W + x;
+    const top = zf[i] * (1 - ax) + zf[i + 1] * ax, bot = zf[i + W] * (1 - ax) + zf[i + W + 1] * ax;
+    return .55 * (top * (1 - ay) + bot * ay);
+  };
+
+  const panel = back => {
+    const g = new THREE.PlaneGeometry(4, 4.4, 360, 396);
+    const pos = g.attributes.position, uv = g.attributes.uv;
+    for (let i = 0; i < pos.count; i++) {
+      const u = uv.getX(i), v = uv.getY(i), x = pos.getX(i), y = pos.getY(i);
+      const z = depthAt(u, v);
+      const ripple = .035 * Math.sin(x * 2.6 + y * 1.7) * (z / .5);   // a little drape, zero at the seams
+      const bend = -.12 * x * x;                                        // torso curves away at the sides
+      pos.setZ(i, (back ? -(z + ripple) : z + ripple) + bend);
+      if (back) uv.setX(i, 1 - u);
+    }
+    if (back) { const idx = g.index.array; for (let i = 0; i < idx.length; i += 3) { const t = idx[i]; idx[i] = idx[i + 2]; idx[i + 2] = t; } }
+    g.computeVertexNormals();
+    return g;
+  };
+  const tex = () => {
+    const c = document.createElement("canvas"); c.width = 400 * TS; c.height = 440 * TS;
+    const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    return t;
+  };
+  const front = tex(), back = tex();
+  const mat = map => new THREE.MeshStandardMaterial({ map, alphaTest: .5, side: THREE.DoubleSide, roughness: .95, metalness: 0 });
+  const tee = new THREE.Group();
+  tee.add(new THREE.Mesh(panel(false), mat(front)), new THREE.Mesh(panel(true), mat(back)));
+  scene.add(tee);
+  host.innerHTML = ""; host.appendChild(renderer.domElement);
+
+  const fit = () => { const r = host.getBoundingClientRect(); renderer.setSize(r.width, r.height, false); camera.aspect = r.width / r.height || 1; camera.updateProjectionMatrix(); };
+  new ResizeObserver(fit).observe(host); fit();
+
+  // drag to spin with inertia; Front/Back buttons glide to a side; gentle sway when idle
+  let rot = state.side === "back" ? Math.PI : 0, vel = 0, target = null, dragging = false, lastX = 0, idleSince = performance.now();
+  const pv = $("#preview");
+  host.addEventListener("pointerdown", e => { dragging = true; lastX = e.clientX; vel = 0; target = null; host.setPointerCapture(e.pointerId); pv.classList.add("grabbing"); });
+  host.addEventListener("pointermove", e => { if (!dragging) return; const dx = (e.clientX - lastX) * .01; lastX = e.clientX; rot += dx; vel = dx; });
+  const up = () => { if (!dragging) return; dragging = false; idleSince = performance.now(); pv.classList.remove("grabbing");
+    const facing = Math.cos(rot + vel * 12) > 0 ? "front" : "back"; if (facing !== state.side) { state.side = facing; syncButtons(); } };
+  host.addEventListener("pointerup", up); host.addEventListener("pointercancel", up);
+
+  let visible = true;
+  new IntersectionObserver(([e]) => visible = e.isIntersecting).observe(host);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  (function loop(now) {
+    requestAnimationFrame(loop);
+    if (!visible) return;
+    if (!dragging) {
+      if (target !== null) { const d = target - rot; rot += d * .12; if (Math.abs(d) < .001) { rot = target; target = null; idleSince = now; } }
+      else { rot += vel; vel *= .92; }
+    }
+    const sway = !dragging && target === null && !reduce ? Math.sin((now - idleSince) / 1400) * .18 * Math.min(1, (now - idleSince) / 1500) : 0;
+    tee.rotation.y = rot + sway;
+    tee.rotation.x = .04;
+    renderer.render(scene, camera);
+  })(performance.now());
+
+  return {
+    update() {
+      drawPanel(front.image.getContext("2d"), "front", state); front.needsUpdate = true;
+      drawPanel(back.image.getContext("2d"), "back", state); back.needsUpdate = true;
+    },
+    face(side) { // glide to the nearest turn that shows this side
+      const want = side === "back" ? Math.PI : 0, k = Math.round((rot - want) / (2 * Math.PI));
+      target = want + k * 2 * Math.PI; vel = 0;
+    },
+  };
+}
+let tee3d = null;
+
+/* ---------- customizer state ---------- */
+// Opens on the front; typing a nickname spins it round to the back (see the #nick input handler)
+const state = { name: "street", case: "street", color: "black", size: "M", side: "front" };
+const params = new URLSearchParams(location.search);
+for (const k of Object.keys(state)) if (params.get(k)) state[k] = params.get(k).slice(0, 16);
+$("#nick").value = state.name;
+
+function syncButtons() {
+  document.querySelectorAll(".seg[data-k]").forEach(seg => {
+    seg.querySelectorAll("button").forEach(b => b.setAttribute("aria-pressed", b.dataset.v === state[seg.dataset.k]));
+  });
+  document.querySelectorAll(".flip button").forEach(b => b.setAttribute("aria-pressed", b.dataset.side === state.side));
+}
+
+function render() {
+  if (tee3d) { tee3d.update(); tee3d.face(state.side); }
+  else $("#shirt").innerHTML = `<img src="${teeThumb(state, state.side)}" alt="${state.color} tee, ${state.side}">`;
+  $("#left").textContent = `${16 - state.name.length} left`;
+  $("#artNote").textContent = tee3d ? "Drag to rotate" : "";
+  $("#addBtn").disabled = !state.name.trim();
+  syncButtons();
+}
+
+$("#nick").addEventListener("input", e => { state.name = e.target.value; state.side = "back"; render(); });
+document.querySelectorAll(".seg[data-k]").forEach(seg => seg.addEventListener("click", e => {
+  const b = e.target.closest("button"); if (!b || b.disabled) return;
+  state[seg.dataset.k] = b.dataset.v;
+  if (seg.dataset.k !== "color" && seg.dataset.k !== "size") state.side = "back";
+  render();
+}));
+document.querySelectorAll(".flip button").forEach(b => b.addEventListener("click", () => { state.side = b.dataset.side; render(); }));
+
+$("#shareBtn").addEventListener("click", async () => {
+  const u = new URL(location.href);
+  u.search = new URLSearchParams({ name: state.name, case: state.case, color: state.color, size: state.size }).toString();
+  u.hash = "custom";
+  try { await navigator.clipboard.writeText(u.toString()); toast("Link copied"); }
+  catch { toast("Couldn’t copy, link is in the address bar"); history.replaceState(null, "", u); }
+});
+
+/* ---------- shop ---------- */
+const PRODUCTS = [
+  { id: "tee-b", name: "Tee, black", price: 39, color: "black", custom: true },
+  { id: "tee-w", name: "Tee, white", price: 39, color: "white", custom: true },
+  { id: "tee-blank", name: "Tee, logo only", price: 29, color: "black" },
+  { id: "tee-blank-w", name: "Tee, logo only, white", price: 29, color: "white" },
+];
+function renderShop() {
+  $("#grid").innerHTML = PRODUCTS.map((p, i) => `
+  <div class="item rise" style="--d:${i % 2 * 100}ms">
+    <button class="card" data-id="${p.id}">
+      <div class="media"><img src="${teeThumb({ color: p.color, name: "yourname", case: "street" }, p.custom ? "back" : "front")}" alt=""><span class="go">${p.custom ? "Customise" : "Add to bag"}</span></div>
+      <div class="meta"><h3>${p.name}</h3><span class="small">€${p.price}${p.custom ? " · custom back" : ""}</span></div>
+    </button>
+  </div>`).join("");
+}
+renderShop();
+$("#grid").addEventListener("click", e => {
+  const c = e.target.closest(".card"); if (!c) return;
+  const p = PRODUCTS.find(x => x.id === c.dataset.id);
+  if (p.custom) { state.color = p.color; state.side = "back"; render(); $("#custom").scrollIntoView({ behavior: "smooth" }); setTimeout(() => $("#nick").focus({ preventScroll: true }), 600); }
+  else addToBag({ name: p.name, price: p.price, color: p.color, size: "M" });
+});
+
+/* ---------- bag (kept in this browser only) ---------- */
+let bag = [];
+try { bag = JSON.parse(localStorage.getItem("sranye-bag") || "[]"); } catch {}
+function saveBag() { try { localStorage.setItem("sranye-bag", JSON.stringify(bag)); } catch {} }
+function renderBag() {
+  $("#bagCount").textContent = bag.length;
+  $("#bagTotal").textContent = "€" + bag.reduce((s, i) => s + i.price, 0);
+  $("#bagList").innerHTML = bag.length ? bag.map((i, n) => `
+    <li><div class="th"><img src="${teeThumb({ color: i.color, name: i.nick || "", case: "typed" }, i.nick ? "back" : "front")}" alt=""></div>
+      <div><b>${esc(i.name)}</b><span class="small">${i.size}${i.nick ? ` · “${esc(i.nick)}”` : ""} · €${i.price}</span></div>
+      <button data-n="${n}">Remove</button></li>`).join("") : "";
+  if (!bag.length) $("#bagList").innerHTML = `<li class="empty small" style="display:block;border:0">Your bag is empty.</li>`;
+}
+function addToBag(item) { bag.push(item); saveBag(); renderBag(); toast(`Added to bag (${bag.length})`); }
+$("#bagList").addEventListener("click", e => { const b = e.target.closest("button[data-n]"); if (!b) return; bag.splice(+b.dataset.n, 1); saveBag(); renderBag(); });
+$("#addBtn").addEventListener("click", () => {
+  addToBag({ name: `Tee, ${state.color}, custom`, price: 39, color: state.color, size: state.size, nick: caseName(state.name, state.case) });
+});
+const openBag = o => { document.body.classList.toggle("bag-open", o); $("#bag").setAttribute("aria-hidden", !o); };
+$("#bagBtn").addEventListener("click", () => openBag(true));
+$("#bagClose").addEventListener("click", () => openBag(false));
+$("#scrim").addEventListener("click", () => openBag(false));
+addEventListener("keydown", e => { if (e.key === "Escape") openBag(false); });
+
+let toastT;
+function toast(msg) { const t = $("#toast"); t.textContent = msg; t.classList.add("on"); clearTimeout(toastT); toastT = setTimeout(() => t.classList.remove("on"), 1800); }
+
+/* ---------- hero scroll: timecode, scrub bar, logo settles ---------- */
+const hero = $(".hero"), mark = $("#heroMark");
+requestAnimationFrame(() => setTimeout(() => mark.classList.remove("flat"), 250));
+
+/* ---------- gate: locked on the logo until Enter; then glide into the site ---------- */
+const enterBtn = $("#enter");
+const gated = !location.hash; // deep links like #custom skip the gate
+if (gated) { history.scrollRestoration = "manual"; scrollTo(0, 0); document.documentElement.classList.add("gated"); }
+// The button shows whenever the logo screen is at rest (see onScroll), so scrolling back
+// to the top brings it back; only the first press unlocks scrolling.
+function enterSite(scroll = true) {
+  document.documentElement.classList.remove("gated");
+  if (scroll) glideTo(hero.offsetHeight);
+}
+
+/* ---------- no dead scroll through the hero: any move inside it glides to the top or past it ---------- */
+let gliding = false, lastY = scrollY;
+function glideTo(target) {
+  gliding = true;
+  const from = scrollY, dist = target - from, dur = Math.min(1000, 400 + Math.abs(dist) * .4), t0 = performance.now();
+  const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  (function step(now) {
+    const t = Math.min(1, (now - t0) / dur);
+    scrollTo(0, from + dist * ease(t));
+    if (t < 1) requestAnimationFrame(step);
+    else { gliding = false; lastY = scrollY; }
+  })(t0);
+}
+// swallow wheel/touch input mid-glide so momentum scrolling can't fight it
+for (const ev of ["wheel", "touchmove"]) addEventListener(ev, e => { if (gliding) e.preventDefault(); }, { passive: false });
+addEventListener("scroll", () => {
+  const y = scrollY, h = hero.offsetHeight;
+  if (!gliding && !document.documentElement.classList.contains("gated") && y > 0 && y < h) glideTo(y < lastY ? 0 : h);
+  if (!gliding) lastY = y;
+}, { passive: true });
+enterBtn.addEventListener("click", () => enterSite());
+addEventListener("keydown", e => { if (e.key === "Enter" && document.documentElement.classList.contains("gated")) enterSite(); });
+document.querySelectorAll('.bar a[href^="#"]').forEach(a => a.addEventListener("click", () => enterSite(false)));
+
+function onScroll() {
+  const max = hero.offsetHeight - innerHeight;
+  const p = Math.min(1, Math.max(0, scrollY / max));
+  $("#scrub").style.transform = `scaleX(${p})`;
+  const f = Math.round(p * 10 * 25); // ten seconds of "footage" at 25fps
+  $("#tc").textContent = `00:00:${String(Math.floor(f / 25)).padStart(2, "0")}:${String(f % 25).padStart(2, "0")}`;
+  mark.style.transform = `scale(${1 - p * .35})`;
+  mark.style.opacity = 1 - Math.max(0, p - .6) * 2.5;
+  enterBtn.classList.toggle("gone", p > .03);
+  $("#bar").classList.toggle("solid", scrollY > hero.offsetHeight - innerHeight * .9);
+}
+addEventListener("scroll", onScroll, { passive: true });
+onScroll();
+
+/* ---------- reveals and clock ---------- */
+const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add("in"); io.unobserve(e.target); } }), { rootMargin: "0px 0px -10% 0px" });
+document.querySelectorAll(".rise").forEach(el => io.observe(el));
+const tick = () => $("#clock").textContent = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+tick(); setInterval(tick, 30000);
+
+// prints are drawn with web fonts, so redraw everything once they've loaded
+document.fonts.ready.then(() => {
+  render(); renderBag();
+  const shown = [...$("#grid").querySelectorAll(".rise")].map(el => el.classList.contains("in"));
+  renderShop();
+  $("#grid").querySelectorAll(".rise").forEach((el, i) => shown[i] ? el.classList.add("in") : io.observe(el));
+});
+tee3d = makeTee3D($("#shirt"));
+render(); renderBag();
+</script>
+</body>
+</html>
