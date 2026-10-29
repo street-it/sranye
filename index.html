@@ -684,15 +684,36 @@ function glideTo(target) {
   gliding = true;
   const from = scrollY, dist = target - from, dur = Math.min(1000, 400 + Math.abs(dist) * .4), t0 = performance.now();
   const ease = t => t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+  const done = () => { if (!gliding) return; scrollTo(0, target); gliding = false; lastY = scrollY; };
+  setTimeout(done, dur + 150); // safety net: if frames stall (tab hidden mid-glide), never leave input blocked
   (function step(now) {
+    if (!gliding) return;
     const t = Math.min(1, (now - t0) / dur);
     scrollTo(0, from + dist * ease(t));
-    if (t < 1) requestAnimationFrame(step);
-    else { gliding = false; lastY = scrollY; }
+    if (t < 1) requestAnimationFrame(step); else done();
   })(t0);
 }
-// swallow wheel/touch input mid-glide so momentum scrolling can't fight it
-for (const ev of ["wheel", "touchmove"]) addEventListener(ev, e => { if (gliding) e.preventDefault(); }, { passive: false });
+// Wheel and swipe on the logo screen are handled here rather than left to native scrolling:
+// a native fling (phone swipe, touchpad momentum) keeps animating after it starts and would
+// fight the glide. Only gestures that would move through the hero are taken over.
+function heroGesture(down, e) {
+  const y = scrollY, h = hero.offsetHeight;
+  if (gliding) { e.preventDefault(); return; }
+  if (down && y < h - 1) { e.preventDefault(); glideTo(h); }
+  else if (!down && y > 0 && y <= h + 2) { e.preventDefault(); glideTo(0); }
+}
+addEventListener("wheel", e => { if (e.deltaY) heroGesture(e.deltaY > 0, e); else if (gliding) e.preventDefault(); }, { passive: false });
+let touchY = null;
+addEventListener("touchstart", e => { touchY = e.touches[0].clientY; }, { passive: true });
+addEventListener("touchmove", e => {
+  if (gliding) { e.preventDefault(); return; }
+  if (touchY === null) return;
+  // decide on the very first move: once a browser lets one touchmove through, it commits
+  // to native scrolling for the rest of the gesture
+  const dy = touchY - e.touches[0].clientY; // finger moving up = scrolling down
+  if (dy) heroGesture(dy > 0, e);
+}, { passive: false });
+// keyboard, scrollbar and anything else: catch it once it has scrolled into the hero
 addEventListener("scroll", () => {
   const y = scrollY, h = hero.offsetHeight;
   if (!gliding && y > 0 && y < h) glideTo(y < lastY ? 0 : h);
