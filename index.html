@@ -170,6 +170,33 @@
     .js .rise { opacity: 0; transform: translateY(24px); transition: opacity 700ms var(--ease-out) var(--d, 0ms), transform 700ms var(--ease-out) var(--d, 0ms); }
     .js .rise.in { opacity: 1; transform: none; }
   }
+  /* Customizer on desktop: exactly one screen tall, so gliding in from the logo shows all of it.
+     The shirt fills the left column top to bottom; heading and options share the right column,
+     with spacing and type scaled off the screen height so short laptops fit too. */
+  @media (min-width: 861px) {
+    .custom { height: 100svh; min-height: 600px; padding: calc(var(--bar-h, 60px) + 12px) var(--gutter) clamp(16px, 3vh, 32px);
+      display: grid; grid-template-columns: 7fr 5fr; grid-template-rows: auto minmax(0, 1fr); column-gap: var(--gutter); row-gap: clamp(16px, 3vh, 36px); }
+    .custom .studio { display: contents; }
+    .custom .preview { grid-column: 1; grid-row: 1 / span 2; position: relative; top: auto; aspect-ratio: auto; height: 100%; min-height: 0; }
+    .custom .head { grid-column: 2; grid-row: 1; flex-direction: column; align-items: flex-start; gap: clamp(8px, 1.6vh, 16px); margin: 0; }
+    .custom .head h2 { font-size: clamp(36px, min(4.4vw, 7.5vh), 80px); }
+    .custom .head .lead { max-width: 38ch; padding: 0; }
+    .custom .controls { grid-column: 2; grid-row: 2; align-content: start; gap: clamp(14px, 2.8vh, 36px); min-height: 0; overflow: auto; }
+    .custom .buy { gap: clamp(14px, 2.8vh, 36px); }
+    .custom .nick { font-size: clamp(32px, min(4.4vw, 6.4vh), 64px); }
+    .custom .total { padding-top: clamp(10px, 2vh, 20px); }
+    .custom .total strong { font-size: clamp(32px, min(4vw, 5.6vh), 56px); }
+  }
+  /* short laptop screens: drop the intro line, price shares the row with the buttons, tighter controls */
+  @media (min-width: 861px) and (max-height: 800px) {
+    .custom .head .lead { display: none; }
+    .custom .buy { grid-template-columns: auto 1fr; align-items: center; border-top: 1px solid rgba(255,255,255,.14); padding-top: clamp(10px, 2vh, 20px); }
+    .custom .buy .total { border: 0; padding: 0; flex-direction: column; gap: 0; }
+    .custom .buy .cta { justify-content: flex-end; flex-wrap: nowrap; }
+    .custom .btn { padding: 12px 18px; }
+    .custom .field > span { margin-bottom: 6px; }
+    .custom .controls .seg button { padding: 6px 11px; }
+  }
   @media (max-width: 860px) {
     .head { flex-direction: column; align-items: flex-start; margin-bottom: 48px; }
     .about { grid-template-columns: 1fr; gap: 40px; }
