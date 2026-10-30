@@ -216,6 +216,7 @@
     /* options as even full-width grids with proper tap targets */
     .controls .seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 6px; }
     .controls .seg[data-k="case"] { grid-auto-flow: row; grid-template-columns: 1fr 1fr; }
+    .controls .seg[data-k="size"] { grid-auto-flow: row; grid-template-columns: repeat(4, 1fr); }
     .controls .seg button { min-height: 48px; padding: 10px 8px; text-align: center; }
     /* price + actions become a bar along the bottom; it steps aside while the keyboard is up */
     .buy { position: sticky; bottom: 0; z-index: 3; grid-template-columns: auto 1fr; align-items: center; gap: 16px; margin: 0 calc(-1 * var(--gutter)); padding: 12px var(--gutter) calc(12px + env(safe-area-inset-bottom)); background: #000; border-top: 1px solid rgba(255,255,255,.14); }
@@ -302,6 +303,8 @@
             <button data-v="L" aria-pressed="false">L</button>
             <button data-v="XL" aria-pressed="false">XL</button>
             <button data-v="XXL" aria-pressed="false">XXL</button>
+            <button data-v="3XL" aria-pressed="false">3XL</button>
+            <button data-v="4XL" aria-pressed="false">4XL</button>
           </div>
         </div>
         <div class="buy">
