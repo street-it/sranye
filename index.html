@@ -398,12 +398,12 @@ function caseName(name, mode) {
 const TS = 2.56; // texture pixels per shirt unit (the shirt is 400 x 440 units)
 const teePath = neckDepth => new Path2D(TEE.replace("Q200 52", `Q200 ${neckDepth}`));
 
-function drawPanel(ctx, side, s, scale = TS) {
+function drawPanel(ctx, side, s, scale = TS, scaleY = scale) {
   const black = s.color === "black";
   const shirt = black ? "#0d0d0d" : "#ededed", ink = black ? "#fff" : "#000", seam = black ? "#262626" : "#cfcfcf";
   ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   ctx.save();
-  ctx.scale(scale, scale);
+  ctx.scale(scale, scaleY);
   const outline = teePath(side === "front" ? 80 : 40);
   ctx.clip(outline);
   ctx.fillStyle = shirt; ctx.fillRect(0, 0, 400, 440);
@@ -448,7 +448,7 @@ function drawPanel(ctx, side, s, scale = TS) {
       ctx.fillText(TIMECODE, px + 42, 325);
       // playhead inverts whatever it crosses, like in the artwork
       ctx.globalCompositeOperation = "difference"; ctx.fillStyle = "#fff";
-      ctx.fillRect(px - 3, 362, 6, 1206);
+      ctx.fillRect(px - 5, 362, 10, 1206);
       ctx.globalCompositeOperation = "source-over";
     }
   }
@@ -537,7 +537,9 @@ function makeTee3D(host) {
     return g;
   };
   const tex = () => {
-    const c = document.createElement("canvas"); c.width = 400 * TS; c.height = 440 * TS;
+    // square power-of-two size so every phone GPU builds mipmaps; without them thin lines
+    // like the playhead fall between the samples when the shirt is drawn small
+    const c = document.createElement("canvas"); c.width = c.height = 1024;
     const t = new THREE.CanvasTexture(c); t.encoding = THREE.sRGBEncoding; t.anisotropy = renderer.capabilities.getMaxAnisotropy();
     return t;
   };
@@ -578,8 +580,8 @@ function makeTee3D(host) {
 
   return {
     update() {
-      drawPanel(front.image.getContext("2d"), "front", state); front.needsUpdate = true;
-      drawPanel(back.image.getContext("2d"), "back", state); back.needsUpdate = true;
+      drawPanel(front.image.getContext("2d"), "front", state, 1024 / 400, 1024 / 440); front.needsUpdate = true;
+      drawPanel(back.image.getContext("2d"), "back", state, 1024 / 400, 1024 / 440); back.needsUpdate = true;
     },
     face(side) { // glide to the nearest turn that shows this side
       const want = side === "back" ? Math.PI : 0, k = Math.round((rot - want) / (2 * Math.PI));
